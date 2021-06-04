@@ -18,8 +18,13 @@ With the release of UR’s new e-Series, the demand for a ROS driver that suppor
 
 It is the core value of Universal Robots, to empower people to achieve any goal within automation. The success criteria of this driver release is to follow this vision, by providing the ROS community with an easy to use, stable and powerful driver, that empowers the community to reach their goals in research and automation without struggling with unimportant technical challenges, instability or lacking features.
 
-## Acknowledgement
+## Acknowledgment
 This driver is forked from the [ur_modern_driver](https://github.com/ros-industrial/ur_modern_driver).
+
+Developed in collaboration between:
+
+[<img height="60" alt="Universal Robots A/S" src="ur_robot_driver/doc/resources/ur_logo.jpg">](https://www.universal-robots.com/) &nbsp; and &nbsp;
+[<img height="60" alt="FZI Research Center for Information Technology" src="ur_robot_driver/doc/resources/fzi-logo_transparenz.png">](https://www.fzi.de).
 
 <!-- 
     ROSIN acknowledgement from the ROSIN press kit
@@ -39,9 +44,6 @@ More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 
 This project has received funding from the European Union’s Horizon 2020  
 research and innovation programme under grant agreement no. 732287. 
-
-It was developed in collaboration between [Universal Robots](https://www.universal-robots.com/) and
-the [FZI Research Center for Information Technology](https://www.fzi.de).
 
 
 ## How to report an issue
@@ -94,7 +96,7 @@ This repository contains the new **ur_robot_driver** and a couple of helper pack
 
 ## Requirements
 This driver requires a system setup with ROS. It is recommended to use **Ubuntu 18.04 with ROS
-melodic**, however using Ubuntu 16.04 with ROS kinetic should also work.
+melodic**, however using Ubuntu 20.04 with ROS noetic should also work.
 
 To make sure that robot control isn't affected by system latencies, it is highly recommended to use
 a real-time kernel with the system. See the [real-time setup guide](ur_robot_driver/doc/real_time.md)
@@ -164,6 +166,18 @@ $ rosdep install --from-paths src --ignore-src -y
 $ catkin_make_isolated
 $ source devel_isolated/setup.bash
 ```
+
+### Note for noetic users
+If you are using ROS noetic, make sure to also clone [`ur_msgs`](https://github.com/ros-industrial/ur_msgs) to your workspace as it is currently not released for ROS noetic (see https://github.com/ros-industrial/ur_msgs/issues/13).
+```
+$ git clone https://github.com/ros-industrial/ur_msgs.git src/ur_msgs
+```
+
+Otherwise you will get build errors such as 
+```
+error: ‘ur_msgs::SetPayload::Request {aka struct ur_msgs::SetPayloadRequest_<std::allocator<void> >}’ has no member named ‘center_of_gravity’
+```
+
 
 ## Setting up a UR robot for ur_robot_driver
 ### Prepare the robot
