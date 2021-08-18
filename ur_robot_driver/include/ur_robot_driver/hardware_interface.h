@@ -35,6 +35,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <std_srvs/Trigger.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <tf2_msgs/TFMessage.h>
@@ -176,7 +177,11 @@ protected:
    * Requires extractToolPose() to be run first.
    */
   void publishPose();
-
+  /*!
+   * \brief Publishes wrench topic
+   * TODO: not sure if coordinate is correct
+  */
+  void publishWrench();
   void publishIOData();
   void publishToolData();
   void publishRobotAndSafetyMode();
@@ -246,6 +251,7 @@ protected:
   tf2::Vector3 tcp_force_;
   tf2::Vector3 tcp_torque_;
   geometry_msgs::TransformStamped tcp_transform_;
+  geometry_msgs::WrenchStamped wrench_msg_;
   double speed_scaling_;
   double target_speed_fraction_;
   double speed_scaling_combined_;
@@ -254,7 +260,8 @@ protected:
   int32_t safety_mode_;
   std::bitset<4> robot_status_bits_;
   std::bitset<11> safety_status_bits_;
-
+  
+  std::unique_ptr<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>> wrench_pub_;
   std::unique_ptr<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage>> tcp_pose_pub_;
   std::unique_ptr<realtime_tools::RealtimePublisher<ur_msgs::IOStates>> io_pub_;
   std::unique_ptr<realtime_tools::RealtimePublisher<ur_msgs::ToolDataMsg>> tool_data_pub_;

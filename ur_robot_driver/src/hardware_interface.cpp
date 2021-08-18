@@ -331,7 +331,8 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
   registerInterface(&speedsc_interface_);
   registerInterface(&fts_interface_);
   registerInterface(&robot_status_interface_);
-
+  
+  wrench_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>(robot_hw_nh, "wrench", 100));
   tcp_pose_pub_.reset(new realtime_tools::RealtimePublisher<tf2_msgs::TFMessage>(root_nh, "/tf", 100));
   io_pub_.reset(new realtime_tools::RealtimePublisher<ur_msgs::IOStates>(robot_hw_nh, "io_states", 1));
   io_pub_->msg_.digital_in_states.resize(actual_dig_in_bits_.size());
@@ -478,6 +479,8 @@ void HardwareInterface::read(const ros::Time& time, const ros::Duration& period)
     extractToolPose(time);
     transformForceTorque();
     publishPose();
+    wrench_msg_.header.stamp = time;
+    publishWrench();
     publishRobotAndSafetyMode();
 
     // pausing state follows runtime state when pausing
@@ -652,6 +655,13 @@ void HardwareInterface::transformForceTorque()
 
   fts_measurements_ = { tcp_force_.x(),  tcp_force_.y(),  tcp_force_.z(),
                         tcp_torque_.x(), tcp_torque_.y(), tcp_torque_.z() };
+  wrench_msg_.header.frame_id = tf_prefix_ + "base";
+  wrench_msg_.wrench.force.x = tcp_force_.x();
+  wrench_msg_.wrench.force.y = tcp_force_.y();
+  wrench_msg_.wrench.force.z = tcp_force_.z();
+  wrench_msg_.wrench.torque.x = tcp_torque_.x();
+  wrench_msg_.wrench.torque.y = tcp_torque_.y();
+  wrench_msg_.wrench.torque.z = tcp_torque_.z();
 }
 
 bool HardwareInterface::isRobotProgramRunning() const
@@ -715,6 +725,18 @@ void HardwareInterface::publishPose()
       tcp_pose_pub_->msg_.transforms.clear();
       tcp_pose_pub_->msg_.transforms.push_back(tcp_transform_);
       tcp_pose_pub_->unlockAndPublish();
+    }
+  }
+}
+
+void HardwareInterface::publishWrench()
+{
+  if (wrench_pub_)
+  {
+    if(wrench_pub_->trylock())
+    {
+      wrench_pub_->msg_ = wrench_msg_;
+      wrench_pub_->unlockAndPublish();
     }
   }
 }
